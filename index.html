@@ -530,9 +530,17 @@
             
             // Función para iniciar la vista de la aplicación (se llama tras el login exitoso)
             function initializeApp() {
+                // *** CORRECCIÓN CLAVE: Esta función debe ser autocontenida y limpia ***
                 const permissionsArray = JSON.parse(localStorage.getItem('userPermissions') || '[]');
                 const loggedInUser = localStorage.getItem('loggedInUser'); // Obtener aquí
                 
+                // Si por alguna razón los datos son nulos (fallo de caché), volvemos al login.
+                if (!loggedInUser || permissionsArray.length === 0) {
+                     loginView.style.display = 'flex';
+                     mainAppView.style.display = 'none';
+                     return;
+                }
+
                 // Actualizar mapa de permisos
                 userPermissionsMap = permissionsArray.reduce((acc, current) => {
                     acc[current.type] = current.actions;
@@ -584,38 +592,53 @@
                     showDashboard(availableTypes[0]);
                 }
                 
-                // --- Manejo de Dropdown de Usuario (Inicializado aquí) ---
+                // --- Manejo de Dropdown de Usuario ---
                 const userMenuButton = document.getElementById('user-menu-button');
                 const userDropdownMenu = document.getElementById('user-dropdown-menu');
+                const changePasswordBtn = document.getElementById('change-password-btn');
+                const logoutBtn = document.getElementById('logout-btn');
 
-                userMenuButton.addEventListener('click', () => {
-                    userDropdownMenu.classList.toggle('hidden');
-                });
+                if (userMenuButton && userDropdownMenu) {
+                    // 1. Toggle del menú al hacer click en el botón de usuario
+                    userMenuButton.addEventListener('click', () => {
+                        userDropdownMenu.classList.toggle('hidden');
+                    });
 
-                document.addEventListener('click', (event) => {
-                    if (userDropdownMenu && !userMenuButton.contains(event.target) && !userDropdownMenu.contains(event.target)) {
-                        userDropdownMenu.classList.add('hidden');
+                    // 2. Cerrar el menú si se hace click fuera
+                    document.addEventListener('click', (event) => {
+                        if (userMenuButton && userDropdownMenu && !userMenuButton.contains(event.target) && !userDropdownMenu.contains(event.target)) {
+                            userDropdownMenu.classList.add('hidden');
+                        }
+                    });
+
+                    // 3. Listener para Cambiar Contraseña
+                    if (changePasswordBtn) {
+                        changePasswordBtn.onclick = (e) => { // Usamos onclick para asegurar que se asigna
+                            e.preventDefault(); 
+                            userDropdownMenu.classList.add('hidden');
+                            alert('Función de Cambiar Contraseña: Se abrirá la ventana para actualizar su clave de acceso.');
+                        };
                     }
-                });
 
-                document.getElementById('change-password-btn').addEventListener('click', (e) => {
-                    e.preventDefault(); 
-                    userDropdownMenu.classList.add('hidden');
-                    alert('Función de Cambiar Contraseña: Se abrirá la ventana para actualizar su clave de acceso.');
-                });
+                    // 4. Listener para Cerrar Sesión
+                    if (logoutBtn) {
+                        logoutBtn.onclick = (e) => { // Usamos onclick para asegurar que se asigna
+                            e.preventDefault();
+                            localStorage.clear();
+                            userDropdownMenu.classList.add('hidden');
+                            
+                            // Transición directa a la vista de login
+                            loginView.style.display = 'flex';
+                            mainAppView.style.display = 'none';
 
-                document.getElementById('logout-btn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.clear();
-                    // En lugar de reload, manipulamos la vista directamente:
-                    loginView.style.display = 'flex';
-                    mainAppView.style.display = 'none';
-                    // Limpiamos los campos de login para el siguiente intento (opcional)
-                    if (loginForm) {
-                        loginForm.reset();
-                        loginMessage.classList.add('hidden');
+                            // Limpiamos los campos de login para el siguiente intento
+                            if (loginForm) {
+                                loginForm.reset();
+                                loginMessage.classList.add('hidden');
+                            }
+                        };
                     }
-                });
+                }
             }
 
 
@@ -691,7 +714,7 @@
                 // OCULTAR MODIFICAR/ANULAR/IMPRIMIR en modo Adicionar
                 formModificarBtn.classList.toggle('hidden', isNew);
                 formAnularBtn.classList.toggle('hidden', isNew);
-                formImprimirBtn.classList.toggle('hidden', isNew); // <--- CORRECCIÓN PARA OCULTAR IMPRIMIR
+                formImprimirBtn.classList.toggle('hidden', isNew); 
                 
                 // Habilitar/Deshabilitar Modificar, Anular
                 // Modificar/Anular solo habilitado si está en modo consultar Y tiene el permiso
