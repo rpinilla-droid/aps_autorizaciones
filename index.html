@@ -215,13 +215,15 @@
                 <div id="form-view" class="hidden">
                     <!-- Barra de Herramientas del Formulario (Modificar, Anular, Imprimir, Guardar, etc.) -->
                     <nav id="form-toolbar" class="bg-white p-4 rounded-lg shadow-lg mb-6 flex flex-wrap gap-3">
-                        <button id="form-modificar-btn" class="flex items-center bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-edit mr-2"></i> Modificar</button>
-                        <button id="form-anular-btn" class="flex items-center bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-times mr-2"></i> Anular</button>
-                        <button id="form-imprimir-btn" class="flex items-center bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition"><i class="fas fa-print mr-2"></i> Imprimir</button>
-                        <span class="border-l mx-2"></span>
+                        <!-- Modificar y Anular se OCULTAN en modo Adicionar -->
+                        <button id="form-modificar-btn" class="flex items-center bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed hidden"><i class="fas fa-edit mr-2"></i> Modificar</button>
+                        <button id="form-anular-btn" class="flex items-center bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed hidden"><i class="fas fa-times mr-2"></i> Anular</button>
+                        
+                        <button id="form-imprimir-btn" class="flex items-center bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition hidden"><i class="fas fa-print mr-2"></i> Imprimir</button>
+                        <span class="border-l mx-2 hidden" id="separator-casos"></span>
                         <button id="form-casos-btn" class="flex items-center bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-folder-open mr-2"></i> Casos</button>
                         <button id="form-excepcion-btn" class="flex items-center bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-certificate mr-2"></i> Excepción</button>
-                        <!-- BOTÓN GUARDAR (Solo visible y activo si se está en Modo Edición y tiene permiso U) -->
+                        <!-- BOTÓN GUARDAR (Solo visible y activo si se está en Modo Edición o Adicionar) -->
                         <button id="form-guardar-btn" class="flex items-center bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed hidden"><i class="fas fa-save mr-2"></i> Guardar</button>
                         <button id="form-cancelar-btn" class="flex items-center bg-gray-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition"><i class="fas fa-undo mr-2"></i> Cancelar</button>
                     </nav>
@@ -509,6 +511,7 @@
             const formAnularBtn = document.getElementById('form-anular-btn');
             const formImprimirBtn = document.getElementById('form-imprimir-btn');
             const formGuardarBtn = document.getElementById('form-guardar-btn');
+            const separatorCasos = document.getElementById('separator-casos');
             
             // Campos de entrada y selección
             const formInputs = document.querySelectorAll('.form-input-display');
@@ -675,35 +678,33 @@
                 const canUpdate = can(type, 'U');
                 const canDelete = can(type, 'D');
 
-                // 1. Control de Habilitación de Campos: Deshabilitados por defecto en consultar/adicionar
-                const disableFields = isConsult || isNew;
-                formInputs.forEach(input => input.disabled = disableFields);
-                formSelects.forEach(select => select.disabled = disableFields);
+                // 1. Control de Habilitación de Campos: Habilitados si es Adicionar O Modificar
+                const fieldsEnabled = isNew || isModify;
+                formInputs.forEach(input => input.disabled = !fieldsEnabled);
+                formSelects.forEach(select => select.disabled = !fieldsEnabled);
 
                 // 2. Control de la Barra de Herramientas del Formulario
                 
-                // Mostrar/Ocultar Guardar
-                formGuardarBtn.classList.toggle('hidden', !isModify);
+                // MOSTRAR/OCULTAR GUARDAR: Visible si es Adicionar O Modificar
+                formGuardarBtn.classList.toggle('hidden', !(isNew || isModify));
                 
-                // Habilitar/Deshabilitar Modificar, Anular, Imprimir
-                // Solo habilitado si está en modo consultar Y tiene el permiso
+                // OCULTAR MODIFICAR/ANULAR/IMPRIMIR en modo Adicionar
+                formModificarBtn.classList.toggle('hidden', isNew);
+                formAnularBtn.classList.toggle('hidden', isNew);
+                formImprimirBtn.classList.toggle('hidden', isNew); // <--- CORRECCIÓN PARA OCULTAR IMPRIMIR
+                
+                // Habilitar/Deshabilitar Modificar, Anular
+                // Modificar/Anular solo habilitado si está en modo consultar Y tiene el permiso
                 formModificarBtn.disabled = !(isConsult && canUpdate); 
                 formAnularBtn.disabled = !(isConsult && canDelete);
-                formImprimirBtn.disabled = isNew;
                 
-                // Botones de flujo (Casos, Excepciones) solo si está en modo Modificar
-                const disableFlowButtons = !isModify;
+                // Botones de flujo (Casos, Excepciones) solo si está en modo Adicionar O Modificar
+                const disableFlowButtons = !(isNew || isModify);
                 document.getElementById('form-casos-btn').disabled = disableFlowButtons;
                 document.getElementById('form-excepcion-btn').disabled = disableFlowButtons;
                 
                 // 3. Actualizar barra de estado
                 updateStatusBar();
-                
-                // 4. Modo Edición: Habilitar campos si el modo es 'modificar'
-                if (isModify) {
-                    formInputs.forEach(input => input.disabled = false);
-                    formSelects.forEach(select => select.disabled = false);
-                }
                 
                 // Aplicar estilos de deshabilitado
                 document.querySelectorAll('#form-toolbar button').forEach(btn => {
@@ -846,6 +847,14 @@
                 });
             }
             
+            if (formImprimirBtn) {
+                formImprimirBtn.addEventListener('click', () => {
+                    const id = document.getElementById('auth-number-display').textContent.replace(/\[.*\]/g, '').trim();
+                    handleAction('imprimir', id);
+                });
+            }
+
+
             // --- Carga Inicial ---
             const loggedInUserCheck = localStorage.getItem('loggedInUser');
 
