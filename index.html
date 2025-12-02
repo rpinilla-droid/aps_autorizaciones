@@ -69,22 +69,38 @@
             min-width: 800px;
         }
         
-        .status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
+        /* Estilo para el menú lateral, asegurando que se adapte al contenido en pantalla de forma vertical */
+        #sidebar-menu {
+             align-self: flex-start;
         }
 
-        /* Ajuste de padding inferior para no ocultar contenido bajo el status bar */
-        main {
-            padding-bottom: 60px; /* Suficiente espacio para el status bar */
-        }
-        
         /* Ocultar las vistas iniciales */
         #main-app-view {
             display: none;
+        }
+        
+        /* Estilos para la barra de estado dentro del formulario (no fija) */
+        .status-bar-container {
+            background-color: #f8f9fa; /* Color de fondo suave */
+            border-top: 1px solid #e2e8f0; /* border-gray-200 */
+            padding: 1rem;
+            border-radius: 0 0 0.5rem 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* Estilos para los campos deshabilitados en modo consulta */
+        .form-input-display[disabled], .form-select-display[disabled] {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #d1d5db; /* gray-300 */
+            cursor: default;
+        }
+        /* Para que los inputs dentro de la tabla no sean editables en modo consulta */
+        #form-view input[type="text"][disabled],
+        #form-view input[type="number"][disabled],
+        #form-view input[type="date"][disabled] {
+            pointer-events: none;
+            color: #4b5563; /* Text-gray-600 */
+            background-color: transparent;
         }
 
     </style>
@@ -103,7 +119,7 @@
                 <form id="login-form">
                     <div class="mb-4 text-left">
                         <label for="username" class="block text-sm font-semibold text-gray-700 mb-1">Usuario (Rol)</label>
-                        <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: auditor, caja, reembolso" required>
+                        <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: auditor, agente, supervisor" required>
                     </div>
                     <div class="mb-6 text-left">
                         <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Contraseña</label>
@@ -131,266 +147,474 @@
             <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
                 <h1 class="text-xl md:text-2xl font-bold mb-2 md:mb-0">Módulo de Servicios de Salud</h1>
                 
-                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                    <div class="flex items-center space-x-2">
-                        <label for="auth-type-selector" class="text-sm font-semibold">Tipo de Autorización:</label>
-                        <select id="auth-type-selector" class="bg-white bg-opacity-20 text-white px-3 py-1.5 rounded-lg border border-white border-opacity-30 font-semibold cursor-pointer">
-                            <!-- Opciones cargadas por JS -->
-                        </select>
-                    </div>
-                    <button id="logout-btn" class="bg-white text-blue-600 hover:bg-gray-100 font-bold px-3 py-1.5 rounded-lg text-sm shadow-md transition duration-150">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Salir
+                <!-- Menú de Usuario (Opciones propias del usuario) -->
+                <div class="relative flex items-center">
+                    <button id="user-menu-button" class="flex items-center space-x-2 p-2 rounded-full hover:bg-blue-500 transition duration-150">
+                        <span class="font-semibold text-lg" id="header-username">USUARIO</span>
+                        <i class="fas fa-user-circle text-2xl"></i>
                     </button>
+                    
+                    <!-- Dropdown del Menú de Usuario -->
+                    <div id="user-dropdown-menu" class="absolute right-0 top-full mt-2 w-56 bg-white text-gray-800 rounded-lg shadow-xl py-1 z-20 hidden">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b mb-1 font-semibold" id="dropdown-username-info"></div>
+                        <a href="#" id="change-password-btn" class="flex items-center px-4 py-2 text-sm hover:bg-gray-100 transition">
+                            <i class="fas fa-key mr-2"></i> Cambiar Contraseña
+                        </a>
+                        <a href="#" id="logout-btn" class="flex items-center px-4 py-2 text-sm hover:bg-gray-100 transition border-t mt-1">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                        </a>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <main class="container mx-auto px-4 py-5">
-            <!-- Barra de Herramientas Principal (Acciones) -->
-            <nav class="bg-white p-4 rounded-lg shadow-lg mb-6 flex flex-wrap gap-3">
-                <!-- Eliminadas referencias a las teclas F# -->
-                <button id="adicionar-btn" class="flex items-center bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-plus mr-2"></i> Adicionar</button>
-                <button id="modificar-btn" class="flex items-center bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition"><i class="fas fa-edit mr-2"></i> Modificar</button>
-                <button id="anular-btn" class="flex items-center bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition"><i class="fas fa-times mr-2"></i> Anular</button>
-                <button class="flex items-center bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition"><i class="fas fa-save mr-2"></i> Guardar</button>
-                <button class="flex items-center bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition"><i class="fas fa-print mr-2"></i> Imprimir</button>
-                <button id="casos-btn" class="flex items-center bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition"><i class="fas fa-folder-open mr-2"></i> Casos</button>
-                <button id="excepcion-btn" class="flex items-center bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-700 transition"><i class="fas fa-certificate mr-2"></i> Excepción</button>
+        <!-- Contenedor principal con Sidebar y Contenido (responsive flex) -->
+        <div class="container mx-auto px-4 py-5 flex flex-col md:flex-row gap-6">
+
+            <!-- 1. SIDEBAR (Menú de Tipos de Autorización) -->
+            <nav id="sidebar-menu" class="w-full md:w-64 bg-white p-4 rounded-xl shadow-lg flex-shrink-0 h-fit">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Tipos de Autorización</h3>
+                <div id="auth-type-menu" class="space-y-1">
+                    <!-- Los botones del menú se insertarán aquí por JS -->
+                </div>
             </nav>
-            
-            <!-- Formulario de Autorización -->
-            <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
-                <h2 class="text-xl font-bold mb-4 text-gray-700">Datos de la Autorización</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    
-                    <!-- Campos principales -->
-                    <div class="space-y-4">
-                        <label for="autorizacion-num" class="block text-sm font-semibold">Autorización #</label>
-                        <input type="text" id="autorizacion-num" value="[Generado Auto]" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="prestador" class="block text-sm font-semibold">Prestador</label>
-                        <input type="text" id="prestador" placeholder="Seleccione Prestador" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="solicita" class="block text-sm font-semibold">Solicitado por</label>
-                        <input type="text" id="solicita" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    
-                    <!-- Campos Afiliado / Teléfono / Tipo Servicio -->
-                    <div class="space-y-4">
-                        <label for="afiliado" class="block text-sm font-semibold">Afiliado</label>
-                        <input type="text" id="afiliado" placeholder="ID/Póliza" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="telefono" class="block text-sm font-semibold">Teléfono</label>
-                        <input type="tel" id="telefono" placeholder="Número de contacto" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="tipo-servicio" class="block text-sm font-semibold">Tipo Servicio</label>
-                        <select id="tipo-servicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            <option>Ambulatorio</option>
-                            <option>Internamiento</option>
-                            <option>Prevención</option>
-                        </select>
-                    </div>
 
-                    <!-- Campos Origen / Tipo Atención / Tipo Riesgo -->
-                    <div class="space-y-4">
-                        <label for="origen" class="block text-sm font-semibold">Origen Servicio</label>
-                        <input type="text" id="origen" placeholder="Código" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="tipo-atencion" class="block text-sm font-semibold">Tipo Atención</label>
-                        <select id="tipo-atencion" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            <option>Programada</option>
-                            <option>Emergencia</option>
-                        </select>
-                    </div>
-                    <div class="space-y-4">
-                        <label for="tipo-riesgo" class="block text-sm font-semibold">Tipo Riesgo</label>
-                        <input type="text" id="tipo-riesgo" placeholder="Seguro de Cobertura" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    
-                    <!-- Campos de Fecha y Dx. -->
-                    <div class="space-y-4">
-                        <label for="apertura" class="block text-sm font-semibold">Fecha Apertura</label>
-                        <input type="date" id="apertura" value="2025-12-01" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="cierre" class="block text-sm font-semibold">Fecha Cierre</label>
-                        <input type="date" id="cierre" placeholder="Auto-cierre para ambulatorio" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="space-y-4">
-                        <label for="dx-presuntivo" class="block text-sm font-semibold">Dx. Presuntivo (CIE-10)</label>
-                        <input type="text" id="dx-presuntivo" placeholder="Buscar Diagnóstico" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Pestañas de Detalle y Alertas -->
-            <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
-                <div class="flex border-b-2 border-gray-200 mb-4 flex-wrap gap-2" id="tab-header">
-                    <button class="tab-btn active" data-tab="servicios">Servicios</button>
-                    <button class="tab-btn" data-tab="diagnosticos">Diagnósticos</button>
-                    <button class="tab-btn" data-tab="restricciones">Restricciones/Alertas</button>
-                    <button class="tab-btn" data-tab="afiliado">Datos Afiliado</button>
-                </div>
+            <!-- 2. PANEL DE CONTENIDO PRINCIPAL -->
+            <div id="main-content-panel" class="flex-grow pb-5">
                 
-                <div id="servicios" class="tab-content active">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Detalle de Servicios</h3>
-                    <div class="services-table-container border rounded-lg">
-                        <table class="w-full text-sm">
+                <!-- VISTA 1: SALPICADERO (Dashboard de Autorizaciones Listadas) -->
+                <div id="dashboard-view" class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+                        <h2 class="text-xl font-bold text-gray-700" id="dashboard-title">Autorizaciones [TIPO SELECCIONADO]</h2>
+                        <!-- Botón Adicionar/Crear - La disponibilidad depende del rol -->
+                        <button id="add-new-btn" class="flex items-center bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-plus mr-2"></i> Adicionar
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="p-3 border-b text-left">Renglón</th>
-                                    <th class="p-3 border-b text-left">Descripción del Servicio</th>
-                                    <th class="p-3 border-b text-left">Cant.</th>
-                                    <th class="p-3 border-b text-left">Precio</th>
-                                    <th class="p-3 border-b text-left">Total</th>
-                                    <th class="p-3 border-b text-left">% Cobertura</th>
-                                    <th class="p-3 border-b text-left">Copago</th>
-                                    <th class="p-3 border-b text-left">Fecha Servicio</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autorización #</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Afiliado</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prestador</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Apertura</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estatus</th>
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="p-3 border-b"><input type="text" value="G-100" class="w-full"></td>
-                                    <td class="p-3 border-b"><input type="text" value="Consulta de Medicina General" class="w-full"></td>
-                                    <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
-                                    <td class="p-3 border-b text-right">1500.00</td>
-                                    <td class="p-3 border-b text-right font-medium">1500.00</td>
-                                    <td class="p-3 border-b"><input type="number" value="80" class="w-full text-right"></td>
-                                    <td class="p-3 border-b text-right font-medium text-red-600">300.00</td>
-                                    <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="p-3 border-b"><input type="text" value="S-205" class="w-full"></td>
-                                    <td class="p-3 border-b"><input type="text" value="Laboratorio Básico" class="w-full"></td>
-                                    <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
-                                    <td class="p-3 border-b text-right">500.00</td>
-                                    <td class="p-3 border-b text-right font-medium">500.00</td>
-                                    <td class="p-3 border-b"><input type="number" value="100" class="w-full text-right"></td>
-                                    <td class="p-3 border-b text-right font-medium text-red-600">0.00</td>
-                                    <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
-                                </tr>
+                            <tbody class="bg-white divide-y divide-gray-200" id="authorizations-list">
+                                <!-- Filas de autorizaciones simuladas se insertarán aquí por JS -->
                             </tbody>
                         </table>
                     </div>
-                    <div class="flex justify-end mt-3">
-                        <button class="bg-blue-100 text-blue-600 font-semibold py-1.5 px-3 rounded-lg hover:bg-blue-200 text-xs"><i class="fas fa-plus mr-1"></i> Añadir Servicio</button>
-                    </div>
-                    <div class="totals flex justify-end gap-6 mt-4 pt-4 border-t border-gray-200 text-lg font-bold">
-                        <span class="text-gray-600">Total Cobertura: <span class="text-green-600">7,200.00</span></span>
-                        <span class="text-gray-600">Total Copago: <span class="text-red-600">800.00</span></span>
-                    </div>
-                </div>
-                
-                <div id="diagnosticos" class="tab-content">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Diagnósticos Secundarios y Condiciones</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="space-y-4">
-                            <label for="dx-sec1" class="block text-sm font-semibold">Dx. Secundario I (CIE-10)</label>
-                            <input type="text" id="dx-sec1" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="space-y-4">
-                            <label for="dx-sec2" class="block text-sm font-semibold">Dx. Secundario II (CIE-10)</label>
-                            <input type="text" id="dx-sec2" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="space-y-4">
-                            <label for="complicacion" class="block text-sm font-semibold">Complicación (CIE-10)</label>
-                            <input type="text" id="complicacion" placeholder="Diagnóstico de complicación" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                        </div>
-                    </div>
                 </div>
 
-                <div id="restricciones" class="tab-content">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-700">📢 Controles y Alertas Aplicadas</h3>
-                    <div class="flex flex-col gap-4">
+                <!-- VISTA 2: FORMULARIO (Creación / Edición) -->
+                <div id="form-view" class="hidden">
+                    <!-- Barra de Herramientas del Formulario (Modificar, Anular, Imprimir, Guardar, etc.) -->
+                    <nav id="form-toolbar" class="bg-white p-4 rounded-lg shadow-lg mb-6 flex flex-wrap gap-3">
+                        <button id="form-modificar-btn" class="flex items-center bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-edit mr-2"></i> Modificar</button>
+                        <button id="form-anular-btn" class="flex items-center bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-times mr-2"></i> Anular</button>
+                        <button id="form-imprimir-btn" class="flex items-center bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition"><i class="fas fa-print mr-2"></i> Imprimir</button>
+                        <span class="border-l mx-2"></span>
+                        <button id="form-casos-btn" class="flex items-center bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-folder-open mr-2"></i> Casos</button>
+                        <button id="form-excepcion-btn" class="flex items-center bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-certificate mr-2"></i> Excepción</button>
+                        <!-- BOTÓN GUARDAR (Solo visible y activo si se está en Modo Edición y tiene permiso U) -->
+                        <button id="form-guardar-btn" class="flex items-center bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed hidden"><i class="fas fa-save mr-2"></i> Guardar</button>
+                        <button id="form-cancelar-btn" class="flex items-center bg-gray-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition"><i class="fas fa-undo mr-2"></i> Cancelar</button>
+                    </nav>
+
+                    <!-- Formulario de Autorización -->
+                    <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-700">Detalle de la Autorización #<span id="auth-number-display">[---]</span></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            
+                            <!-- Campos principales -->
+                            <div class="space-y-4">
+                                <label for="autorizacion-num" class="block text-sm font-semibold">Autorización #</label>
+                                <input type="text" id="autorizacion-num" value="[Auto]" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="prestador" class="block text-sm font-semibold">Prestador</label>
+                                <input type="text" id="prestador" placeholder="Seleccione Prestador" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="solicita" class="block text-sm font-semibold">Solicitado por</label>
+                                <input type="text" id="solicita" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            
+                            <!-- Campos Afiliado / Teléfono / Tipo Servicio -->
+                            <div class="space-y-4">
+                                <label for="afiliado" class="block text-sm font-semibold">Afiliado</label>
+                                <input type="text" id="afiliado" placeholder="ID/Póliza" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="telefono" class="block text-sm font-semibold">Teléfono</label>
+                                <input type="tel" id="telefono" placeholder="Número de contacto" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="tipo-servicio" class="block text-sm font-semibold">Tipo Servicio</label>
+                                <select id="tipo-servicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-select-display">
+                                    <option>Ambulatorio</option>
+                                    <option>Internamiento</option>
+                                    <option>Prevención</option>
+                                </select>
+                            </div>
+
+                            <!-- Campos Origen / Tipo Atención / Tipo Riesgo -->
+                            <div class="space-y-4">
+                                <label for="origen" class="block text-sm font-semibold">Origen Servicio</label>
+                                <input type="text" id="origen" placeholder="Código" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="tipo-atencion" class="block text-sm font-semibold">Tipo Atención</label>
+                                <select id="tipo-atencion" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-select-display">
+                                    <option>Programada</option>
+                                    <option>Emergencia</option>
+                                </select>
+                            </div>
+                            <div class="space-y-4">
+                                <label for="tipo-riesgo" class="block text-sm font-semibold">Tipo Riesgo</label>
+                                <input type="text" id="tipo-riesgo" placeholder="Seguro de Cobertura" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            
+                            <!-- Campos de Fecha y Dx. -->
+                            <div class="space-y-4">
+                                <label for="apertura" class="block text-sm font-semibold">Fecha Apertura</label>
+                                <input type="date" id="apertura" value="2025-12-01" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="cierre" class="block text-sm font-semibold">Fecha Cierre</label>
+                                <input type="date" id="cierre" placeholder="Auto-cierre para ambulatorio" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                            <div class="space-y-4">
+                                <label for="dx-presuntivo" class="block text-sm font-semibold">Dx. Presuntivo (CIE-10)</label>
+                                <input type="text" id="dx-presuntivo" placeholder="Buscar Diagnóstico" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Pestañas de Detalle y Alertas -->
+                    <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                        <div class="flex border-b-2 border-gray-200 mb-4 flex-wrap gap-2" id="tab-header">
+                            <button class="tab-btn active" data-tab="servicios">Servicios</button>
+                            <button class="tab-btn" data-tab="diagnosticos">Diagnósticos</button>
+                            <button class="tab-btn" data-tab="restricciones">Restricciones/Alertas</button>
+                            <button class="tab-btn" data-tab="afiliado">Datos Afiliado</button>
+                        </div>
                         
-                        <!-- Alerta por Afiliado/Servicio/Grupos -->
-                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-yellow-100 text-yellow-800 border border-yellow-300">
-                            <i class="fas fa-exclamation-triangle mt-1"></i>
-                            <div>
-                                <span class="font-bold">Alerta por Afiliado:</span> Límite de 3 consultas de especialidad alcanzado para el mes.
+                        <div id="servicios" class="tab-content active">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-700">Detalle de Servicios</h3>
+                            <div class="services-table-container border rounded-lg">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="p-3 border-b text-left">Renglón</th>
+                                            <th class="p-3 border-b text-left">Descripción del Servicio</th>
+                                            <th class="p-3 border-b text-left">Cant.</th>
+                                            <th class="p-3 border-b text-left">Precio</th>
+                                            <th class="p-3 border-b text-left">Total</th>
+                                            <th class="p-3 border-b text-left">% Cobertura</th>
+                                            <th class="p-3 border-b text-left">Copago</th>
+                                            <th class="p-3 border-b text-left">Fecha Servicio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-3 border-b"><input type="text" value="G-100" class="w-full"></td>
+                                            <td class="p-3 border-b"><input type="text" value="Consulta de Medicina General" class="w-full"></td>
+                                            <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
+                                            <td class="p-3 border-b text-right">1500.00</td>
+                                            <td class="p-3 border-b text-right font-medium">1500.00</td>
+                                            <td class="p-3 border-b"><input type="number" value="80" class="w-full text-right"></td>
+                                            <td class="p-3 border-b text-right font-medium text-red-600">300.00</td>
+                                            <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-3 border-b"><input type="text" value="S-205" class="w-full"></td>
+                                            <td class="p-3 border-b"><input type="text" value="Laboratorio Básico" class="w-full"></td>
+                                            <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
+                                            <td class="p-3 border-b text-right">500.00</td>
+                                            <td class="p-3 border-b text-right font-medium">500.00</td>
+                                            <td class="p-3 border-b"><input type="number" value="100" class="w-full text-right"></td>
+                                            <td class="p-3 border-b text-right font-medium text-red-600">0.00</td>
+                                            <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-end mt-3">
+                                <button class="bg-blue-100 text-blue-600 font-semibold py-1.5 px-3 rounded-lg hover:bg-blue-200 text-xs"><i class="fas fa-plus mr-1"></i> Añadir Servicio</button>
+                            </div>
+                            <div class="totals flex justify-end gap-6 mt-4 pt-4 border-t border-gray-200 text-lg font-bold">
+                                <span class="text-gray-600">Total Cobertura: <span class="text-green-600">7,200.00</span></span>
+                                <span class="text-gray-600">Total Copago: <span class="text-red-600">800.00</span></span>
                             </div>
                         </div>
                         
-                        <!-- Restricción con Opción de Excepción -->
-                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-red-100 text-red-800 border border-red-300 justify-between flex-wrap gap-2">
-                            <div class="flex items-start space-x-3">
-                                <i class="fas fa-ban mt-1"></i>
-                                <div>
-                                    <span class="font-bold">Restricción por Servicio:</span> El servicio "Ecografía 3D" no está cubierto por el plan básico del afiliado.
+                        <div id="diagnosticos" class="tab-content">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-700">Diagnósticos Secundarios y Condiciones</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="space-y-4">
+                                    <label for="dx-sec1" class="block text-sm font-semibold">Dx. Secundario I (CIE-10)</label>
+                                    <input type="text" id="dx-sec1" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                                </div>
+                                <div class="space-y-4">
+                                    <label for="dx-sec2" class="block text-sm font-semibold">Dx. Secundario II (CIE-10)</label>
+                                    <input type="text" id="dx-sec2" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
+                                </div>
+                                <div class="space-y-4">
+                                    <label for="complicacion" class="block text-sm font-semibold">Complicación (CIE-10)</label>
+                                    <input type="text" id="complicacion" placeholder="Diagnóstico de complicación" class="w-full px-3 py-2 border border-gray-300 rounded-lg form-input-display">
                                 </div>
                             </div>
-                            <button class="bg-gray-500 text-white font-semibold py-1.5 px-3 rounded-lg hover:bg-gray-600 text-xs self-center">Crear Excepción</button>
                         </div>
-                        
-                        <!-- Notificación de Auditoría -->
-                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-blue-100 text-blue-800 border border-blue-300">
-                            <i class="fas fa-notes-medical mt-1"></i>
-                            <div>
-                                <span class="font-bold">Auditoría Concurrente:</span> Esta autorización ha activado el módulo de auditoría concurrente.
+
+                        <div id="restricciones" class="tab-content">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-700">📢 Controles y Alertas Aplicadas</h3>
+                            <div class="flex flex-col gap-4">
+                                
+                                <!-- Alerta por Afiliado/Servicio/Grupos -->
+                                <div class="p-4 rounded-lg flex items-start space-x-3 bg-yellow-100 text-yellow-800 border border-yellow-300">
+                                    <i class="fas fa-exclamation-triangle mt-1"></i>
+                                    <div>
+                                        <span class="font-bold">Alerta por Afiliado:</span> Límite de 3 consultas de especialidad alcanzado para el mes.
+                                    </div>
+                                </div>
+                                
+                                <!-- Restricción con Opción de Excepción -->
+                                <div class="p-4 rounded-lg flex items-start space-x-3 bg-red-100 text-red-800 border border-red-300 justify-between flex-wrap gap-2">
+                                    <div class="flex items-start space-x-3">
+                                        <i class="fas fa-ban mt-1"></i>
+                                        <div>
+                                            <span class="font-bold">Restricción por Servicio:</span> El servicio "Ecografía 3D" no está cubierto por el plan básico del afiliado.
+                                        </div>
+                                    </div>
+                                    <button class="bg-gray-500 text-white font-semibold py-1.5 px-3 rounded-lg hover:bg-gray-600 text-xs self-center">Crear Excepción</button>
+                                </div>
+                                
+                                <!-- Notificación de Auditoría -->
+                                <div class="p-4 rounded-lg flex items-start space-x-3 bg-blue-100 text-blue-800 border border-blue-300">
+                                    <i class="fas fa-notes-medical mt-1"></i>
+                                    <div>
+                                        <span class="font-bold">Auditoría Concurrente:</span> Esta autorización ha activado el módulo de auditoría concurrente.
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div id="afiliado" class="tab-content">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Datos Generales del Afiliado y Planes</h3>
-                    <p class="text-gray-600">Aquí se informa de los datos generales del afiliado en cuestión, así como la descripción y los periodos de vigencia de los planes contratados por el afiliado (Básico, Voluntario, Colectivo, etc.).</p>
-                </div>
+                        
+                        <div id="afiliado" class="tab-content">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-700">Datos Generales del Afiliado y Planes</h3>
+                            <p class="text-gray-600">Aquí se informa de los datos generales del afiliado en cuestión, así como la descripción y los periodos de vigencia de los planes contratados por el afiliado (Básico, Voluntario, Colectivo, etc.).</p>
+                        </div>
 
-            </section>
-        </main>
-        
-        <!-- Barra de Estatus (Fixed Footer) -->
-        <footer class="status-bar bg-gray-800 text-white p-3 shadow-2xl flex justify-start items-center flex-wrap gap-5 text-sm">
-            <span>Estatus: <span id="status-text" class="font-bold text-green-400">Consultando</span></span>
-            <span>Usuario: <span id="status-user" class="font-bold"></span></span>
-            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Modificaciones"><i class="fas fa-exchange-alt mr-1"></i> Modificaciones: 2</button>
-            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Notas"><i class="fas fa-comment-dots mr-1"></i> Notas: 1</button>
-            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Digitalizaciones"><i class="fas fa-file-alt mr-1"></i> Digitalizaciones: 3</button>
-        </footer>
+                    </section>
+                    
+                    <!-- Barra de Estatus (Integrada al Formulario) -->
+                    <div class="status-bar-container bg-gray-50 rounded-xl shadow-inner p-4 text-sm">
+                        <div class="flex flex-wrap gap-5 justify-start items-center">
+                            <span><span class="font-bold text-gray-700">Estatus:</span> <span id="status-text" class="font-bold text-green-400">Consultando</span></span>
+                            <span><span class="font-bold text-gray-700">Usuario:</span> <span id="status-user" class="font-bold"></span></span>
+                            <button class="flex items-center text-gray-600 hover:text-blue-600 transition" title="Ver Modificaciones"><i class="fas fa-exchange-alt mr-1"></i> Modificaciones: 2</button>
+                            <button class="flex items-center text-gray-600 hover:text-blue-600 transition" title="Ver Notas"><i class="fas fa-comment-dots mr-1"></i> Notas: 1</button>
+                            <button class="flex items-center text-gray-600 hover:text-blue-600 transition" title="Ver Digitalizaciones"><i class="fas fa-file-alt mr-1"></i> Digitalizaciones: 3</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Configuración de Roles ---
+            // --- Configuración de Roles y Permisos ---
+            // Tipos de acciones permitidas: C (Crear), R (Consultar), U (Actualizar), D (Anular)
+            const ALL = ['telefonia', 'precertificacion', 'referidas', 'reembolso', 'webservice', 'reclamo', 'capitas'];
+
             const roles = {
-                auditor: ['telefonia', 'precertificacion', 'reembolso', 'reclamo', 'ivr', 'webservice', 'importadas'],
-                caja: ['telefonia', 'precertificacion'],
-                reembolso: ['reembolso'],
+                // Auditor: CRUD en todo.
+                auditor: { permissions: ALL.map(type => ({ type, actions: ['C', 'R', 'U', 'D'] })) },
+                
+                // Agente: CRU solo en Telefónica.
+                agente: { permissions: [{ type: 'telefonia', actions: ['C', 'R', 'U'] }] },
+                
+                // Supervisor: CRUD en Telefónica. R en el resto.
+                supervisor: {
+                    permissions: [
+                        { type: 'telefonia', actions: ['C', 'R', 'U', 'D'] },
+                        { type: 'precertificacion', actions: ['R'] },
+                        { type: 'referidas', actions: ['R'] },
+                        { type: 'reembolso', actions: ['R'] },
+                        { type: 'webservice', actions: ['R'] },
+                        { type: 'reclamo', actions: ['R'] },
+                        { type: 'capitas', actions: ['R'] },
+                    ]
+                }
             };
 
             // Mapeo de tipos de autorización para el selector
             const optionsMap = {
                 'telefonia': 'Autorizaciones Telefónicas',
                 'precertificacion': 'Autorizaciones Pre-Certificadas',
+                'referidas': 'Autorizaciones Referidas',
                 'reembolso': 'Autorizaciones de Reembolsos',
-                'reclamo': 'Autorizaciones Reclamos No Autorizados',
-                'ivr': 'Autorizaciones IVR (Solo Modificar)',
-                'webservice': 'Autorizaciones Web Service (Solo Modificar)',
-                'importadas': 'Autorizaciones Importadas (Solo Modificar)'
+                'webservice': 'Autorizaciones Web Service',
+                'reclamo': 'Reclamos No Autorizados',
+                'capitas': 'Contratos por Capitas'
+            };
+            
+            // Datos simulados de autorizaciones por tipo
+            const mockAuthorizations = {
+                'telefonia': [
+                    { id: 'AUT-1001', afiliado: 'Juan Pérez', prestador: 'Clínica Central', fecha: '2025-11-20', estatus: 'Pendiente' },
+                    { id: 'AUT-1002', afiliado: 'María López', prestador: 'Hospital del Sol', fecha: '2025-11-21', estatus: 'Cerrada' }
+                ],
+                'precertificacion': [
+                    { id: 'PRE-500', afiliado: 'Carlos Ruiz', prestador: 'Centro de Cirugía', fecha: '2025-11-15', estatus: 'Aprobada' },
+                ],
+                'referidas': [
+                    { id: 'REF-001', afiliado: 'Luisa Peña', prestador: 'Clínica General', fecha: '2025-11-18', estatus: 'Pendiente' },
+                ],
+                'reembolso': [
+                    { id: 'REM-205', afiliado: 'Ana Gómez', prestador: 'Dr. Smith', fecha: '2025-11-25', estatus: 'Revisión' },
+                ],
+                'webservice': [
+                    { id: 'WEB-404', afiliado: 'Javier Soto', prestador: 'Laboratorio', fecha: '2025-11-29', estatus: 'Abierta' },
+                ],
+                'reclamo': [
+                    { id: 'REC-301', afiliado: 'Pedro Sanz', prestador: 'Servicios Externos', fecha: '2025-11-10', estatus: 'Reclamado' },
+                ],
+                'capitas': [
+                    { id: 'CAP-150', afiliado: 'Elena Díaz', prestador: 'Centro Preventivo', fecha: '2025-11-05', estatus: 'Cerrada' },
+                ]
             };
 
-            // Elementos de la vista
+            // --- Elementos de Vistas y Estados ---
             const loginView = document.getElementById('login-view');
             const mainAppView = document.getElementById('main-app-view');
-            const loginForm = document.getElementById('login-form');
+            const dashboardView = document.getElementById('dashboard-view');
+            const formView = document.getElementById('form-view');
+            const authTypeMenu = document.getElementById('auth-type-menu');
+            const formCancelarBtn = document.getElementById('form-cancelar-btn');
+            const addNewBtn = document.getElementById('add-new-btn');
+            const loginForm = document.getElementById('login-form'); 
+            const loginMessage = document.getElementById('login-message');
+            
+            // Botones de la barra del formulario
+            const formModificarBtn = document.getElementById('form-modificar-btn');
+            const formAnularBtn = document.getElementById('form-anular-btn');
+            const formImprimirBtn = document.getElementById('form-imprimir-btn');
+            const formGuardarBtn = document.getElementById('form-guardar-btn');
+            
+            // Campos de entrada y selección
+            const formInputs = document.querySelectorAll('.form-input-display');
+            const formSelects = document.querySelectorAll('.form-select-display');
+            
+            let currentMode = 'dashboard'; // 'dashboard', 'consultar', 'adicionar', 'modificar'
 
-            // --- Control de Vistas ---
-            const loggedInUser = localStorage.getItem('loggedInUser');
-            if (loggedInUser) {
+
+            // --- Funciones de Permisos ---
+            let userPermissionsMap = {}; // Mapeo { 'telefonia': ['C', 'R', 'U', 'D'], ... }
+
+            const can = (type, action) => userPermissionsMap[type] && userPermissionsMap[type].includes(action);
+            const getCurrentAuthType = () => document.querySelector('#auth-type-menu button.bg-blue-100')?.getAttribute('data-auth-type');
+            
+            // --- Control de Vistas y Lógica de Inicio ---
+            
+            // Función para iniciar la vista de la aplicación (se llama tras el login exitoso)
+            function initializeApp() {
+                const permissionsArray = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+                const loggedInUser = localStorage.getItem('loggedInUser'); // Obtener aquí
+                
+                // Actualizar mapa de permisos
+                userPermissionsMap = permissionsArray.reduce((acc, current) => {
+                    acc[current.type] = current.actions;
+                    return acc;
+                }, {});
+
+                // Configuración de la cabecera (Header)
+                const headerUsername = document.getElementById('header-username');
+                const dropdownUsernameInfo = document.getElementById('dropdown-username-info');
+                const statusUser = document.getElementById('status-user');
+                
+                headerUsername.textContent = loggedInUser;
+                dropdownUsernameInfo.textContent = 'Rol: ' + loggedInUser;
+                statusUser.textContent = loggedInUser; 
+                
+                // Configuración del Menú Lateral
+                const availableTypes = permissionsArray.map(p => p.type);
+                authTypeMenu.innerHTML = ''; // Limpiar menú
+                
+                availableTypes.forEach((permission, index) => {
+                    const button = document.createElement('button');
+                    button.classList.add('w-full', 'text-left', 'p-2', 'rounded-lg', 'transition', 'duration-150', 'text-gray-700', 'hover:bg-blue-50', 'hover:text-blue-600', 'font-semibold', 'text-sm');
+                    button.textContent = optionsMap[permission] || permission;
+                    button.setAttribute('data-auth-type', permission);
+                    
+                    if (index === 0) {
+                        button.classList.add('bg-blue-100', 'text-blue-600');
+                    }
+
+                    button.addEventListener('click', (e) => {
+                        document.querySelectorAll('#auth-type-menu button').forEach(btn => {
+                            btn.classList.remove('bg-blue-100', 'text-blue-600');
+                            btn.classList.add('text-gray-700');
+                        });
+                        button.classList.add('bg-blue-100', 'text-blue-600');
+                        button.classList.remove('text-gray-700');
+                        
+                        showDashboard(permission);
+                    });
+
+                    authTypeMenu.appendChild(button);
+                });
+                
+                // Mostrar vista de aplicación y cargar dashboard inicial
                 loginView.style.display = 'none';
                 mainAppView.style.display = 'block';
-                initializeApp();
-            } else {
-                loginView.style.display = 'flex';
-                mainAppView.style.display = 'none';
+
+                if (availableTypes.length > 0) {
+                    showDashboard(availableTypes[0]);
+                }
+                
+                // --- Manejo de Dropdown de Usuario (Inicializado aquí) ---
+                const userMenuButton = document.getElementById('user-menu-button');
+                const userDropdownMenu = document.getElementById('user-dropdown-menu');
+
+                userMenuButton.addEventListener('click', () => {
+                    userDropdownMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (userDropdownMenu && !userMenuButton.contains(event.target) && !userDropdownMenu.contains(event.target)) {
+                        userDropdownMenu.classList.add('hidden');
+                    }
+                });
+
+                document.getElementById('change-password-btn').addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    userDropdownMenu.classList.add('hidden');
+                    alert('Función de Cambiar Contraseña: Se abrirá la ventana para actualizar su clave de acceso.');
+                });
+
+                document.getElementById('logout-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.clear();
+                    // En lugar de reload, manipulamos la vista directamente:
+                    loginView.style.display = 'flex';
+                    mainAppView.style.display = 'none';
+                    // Limpiamos los campos de login para el siguiente intento (opcional)
+                    if (loginForm) {
+                        loginForm.reset();
+                        loginMessage.classList.add('hidden');
+                    }
+                });
             }
+
 
             // --- Lógica de Login ---
             if (loginForm) {
@@ -398,138 +622,236 @@
                     e.preventDefault();
                     const username = document.getElementById('username').value.toLowerCase();
                     const password = document.getElementById('password').value;
-                    const loginMessage = document.getElementById('login-message');
                     
                     if (password === '1234' && roles[username]) {
-                        localStorage.setItem('userPermissions', JSON.stringify(roles[username]));
+                        localStorage.setItem('userRole', username);
+                        localStorage.setItem('userPermissions', JSON.stringify(roles[username].permissions));
                         localStorage.setItem('loggedInUser', username.toUpperCase()); 
                         
-                        // Transición a la vista principal
-                        loginView.style.display = 'none';
-                        mainAppView.style.display = 'block';
+                        // Transición directa a la aplicación sin reload
                         initializeApp();
                     } else {
-                        loginMessage.textContent = 'Credenciales o rol no válidos. Pruebe con "auditor", "caja", o "reembolso" y contraseña 1234.';
+                        loginMessage.textContent = 'Credenciales o rol no válidos. Pruebe con "auditor", "agente", o "supervisor" y contraseña 1234.';
                         loginMessage.classList.remove('hidden');
                     }
                 });
             }
 
-            // --- Lógica de la Aplicación Principal ---
-            function initializeApp() {
-                const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
-                const loggedInUser = localStorage.getItem('loggedInUser');
-                const authTypeSelector = document.getElementById('auth-type-selector');
-                const statusUser = document.getElementById('status-user');
+            // --- Lógica de Vistas (showDashboard y setFormMode) ---
+            function showDashboard(type) {
+                currentMode = 'dashboard';
+                dashboardView.classList.remove('hidden');
+                formView.classList.add('hidden');
+                document.getElementById('dashboard-title').textContent = `Autorizaciones: ${optionsMap[type] || type}`;
                 
-                statusUser.textContent = loggedInUser; 
+                // Control del botón Adicionar
+                const canCreate = can(type, 'C');
+                addNewBtn.disabled = !canCreate;
+                addNewBtn.classList.toggle('opacity-50', !canCreate);
+                addNewBtn.classList.toggle('cursor-not-allowed', !canCreate);
 
-                // Función para cargar las opciones de Autorización según el rol
-                function loadAuthorizationOptions() {
-                    authTypeSelector.innerHTML = ''; 
-                    
-                    userPermissions.forEach(permission => {
-                        const option = document.createElement('option');
-                        option.value = permission;
-                        option.textContent = optionsMap[permission] || permission;
-                        authTypeSelector.appendChild(option);
-                    });
+                loadAuthorizationsList(type);
+            }
+
+            function setFormMode(mode, id = null) {
+                const type = getCurrentAuthType();
+                if (!type) return; 
+
+                if (mode === 'adicionar' && !can(type, 'C')) {
+                    alert('Permiso denegado: No tiene autorización para crear este tipo de registro.');
+                    return;
                 }
                 
-                // Control de acceso por tipo de autorización seleccionada
-                function updatePermissionsForType(selectedType) {
-                    const isReadWrite = ['telefonia', 'precertificacion', 'reembolso', 'reclamo'].includes(selectedType);
-                    const isReadOnly = ['ivr', 'webservice', 'importadas'].includes(selectedType);
+                dashboardView.classList.add('hidden');
+                formView.classList.remove('hidden');
+                currentMode = mode;
+                
+                const isNew = mode === 'adicionar';
+                const isConsult = mode === 'consultar';
+                const isModify = mode === 'modificar';
+                
+                document.getElementById('auth-number-display').textContent = isNew ? '[NUEVA - ' + (optionsMap[type] || type).toUpperCase() + ']' : id;
+                
+                const canUpdate = can(type, 'U');
+                const canDelete = can(type, 'D');
 
-                    // Botones de acción
-                    document.getElementById('adicionar-btn').disabled = !isReadWrite;
-                    document.getElementById('modificar-btn').disabled = !isReadWrite && !isReadOnly; 
-                    document.getElementById('anular-btn').disabled = isReadOnly; 
-                    document.getElementById('casos-btn').disabled = !isReadWrite;
-                    document.getElementById('excepcion-btn').disabled = !isReadWrite;
+                // 1. Control de Habilitación de Campos: Deshabilitados por defecto en consultar/adicionar
+                const disableFields = isConsult || isNew;
+                formInputs.forEach(input => input.disabled = disableFields);
+                formSelects.forEach(select => select.disabled = disableFields);
+
+                // 2. Control de la Barra de Herramientas del Formulario
+                
+                // Mostrar/Ocultar Guardar
+                formGuardarBtn.classList.toggle('hidden', !isModify);
+                
+                // Habilitar/Deshabilitar Modificar, Anular, Imprimir
+                // Solo habilitado si está en modo consultar Y tiene el permiso
+                formModificarBtn.disabled = !(isConsult && canUpdate); 
+                formAnularBtn.disabled = !(isConsult && canDelete);
+                formImprimirBtn.disabled = isNew;
+                
+                // Botones de flujo (Casos, Excepciones) solo si está en modo Modificar
+                const disableFlowButtons = !isModify;
+                document.getElementById('form-casos-btn').disabled = disableFlowButtons;
+                document.getElementById('form-excepcion-btn').disabled = disableFlowButtons;
+                
+                // 3. Actualizar barra de estado
+                updateStatusBar();
+                
+                // 4. Modo Edición: Habilitar campos si el modo es 'modificar'
+                if (isModify) {
+                    formInputs.forEach(input => input.disabled = false);
+                    formSelects.forEach(select => select.disabled = false);
+                }
+                
+                // Aplicar estilos de deshabilitado
+                document.querySelectorAll('#form-toolbar button').forEach(btn => {
+                    if (btn.id !== 'form-cancelar-btn' && btn.id !== 'form-guardar-btn' && btn.id !== 'form-imprimir-btn') {
+                        btn.classList.toggle('opacity-50', btn.disabled);
+                        btn.classList.toggle('cursor-not-allowed', btn.disabled);
+                    }
+                });
+            }
+
+            function updateStatusBar() {
+                const type = getCurrentAuthType();
+                const statusText = document.getElementById('status-text');
+                statusText.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400', 'text-gray-400');
+                
+                const canUpdate = can(type, 'U');
+
+                if (currentMode === 'adicionar') {
+                     statusText.textContent = 'Adicionando Nueva';
+                     statusText.classList.add('text-green-400');
+                } else if (currentMode === 'modificar') {
+                    statusText.textContent = 'Modo Edición';
+                    statusText.classList.add('text-red-400');
+                } else if (currentMode === 'consultar') {
+                    statusText.textContent = canUpdate ? 'Leyendo (Modificable)' : 'Solo Lectura';
+                    statusText.classList.add(canUpdate ? 'text-yellow-400' : 'text-gray-400');
+                } else {
+                     statusText.textContent = 'Consultando';
+                }
+            }
+
+
+            // --- Lógica de Listado ---
+            function loadAuthorizationsList(type) {
+                const listBody = document.getElementById('authorizations-list');
+                listBody.innerHTML = '';
+                
+                const currentAuths = mockAuthorizations[type] || [];
+                const canRead = can(type, 'R');
+                
+                if (!canRead) {
+                    listBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold">Permiso denegado: No tiene permisos para consultar este tipo de autorización.</td></tr>`;
+                    return;
+                }
+                
+                if (currentAuths.length === 0) {
+                    listBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No hay autorizaciones de tipo '${optionsMap[type]}' registradas.</td></tr>`;
+                    return;
+                }
+
+                currentAuths.forEach(auth => {
+                    const row = listBody.insertRow();
+                    row.classList.add('hover:bg-blue-50');
                     
-                    // Actualizar el estado en el footer
-                    const statusText = document.getElementById('status-text');
-                    if (isReadWrite) {
-                        statusText.textContent = 'Modo Escritura/Lectura';
-                        statusText.classList.remove('text-red-400');
-                        statusText.classList.add('text-green-400');
-                    } else if (isReadOnly) {
-                         statusText.textContent = 'Modo Solo Modificación';
-                         statusText.classList.remove('text-green-400');
-                         statusText.classList.add('text-red-400');
+                    // Acción principal: Ver Detalle (consultar)
+                    const actionButton = `<button onclick="handleAction('consultar', '${auth.id}')" class="text-blue-600 hover:text-blue-800 transition" title="Ver Detalle"><i class="fas fa-eye"></i> Ver</button>`;
+
+                    const actionsHtml = `
+                        <div class="flex space-x-2 justify-center">
+                            ${actionButton}
+                        </div>
+                    `;
+
+                    row.insertCell().textContent = auth.id;
+                    row.insertCell().textContent = auth.afiliado;
+                    row.insertCell().textContent = auth.prestador;
+                    row.insertCell().textContent = auth.fecha;
+                    row.insertCell().innerHTML = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${auth.estatus === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : auth.estatus === 'Cerrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${auth.estatus}</span>`;
+                    row.insertCell().innerHTML = actionsHtml;
+                    row.cells[row.cells.length - 1].classList.add('text-center', 'whitespace-nowrap');
+                });
+            }
+            
+            // --- Lógica de Botones y Acciones Globales ---
+            window.handleAction = (action, id) => {
+                const authType = getCurrentAuthType();
+                if (!authType) return;
+                
+                if (action === 'consultar') {
+                    setFormMode('consultar', id);
+                } else if (action === 'modificar') {
+                    if (can(authType, 'U')) {
+                        setFormMode('modificar', id);
                     } else {
-                         statusText.textContent = 'Modo Consulta';
-                         statusText.classList.remove('text-green-400', 'text-red-400');
+                         alert('Permiso denegado: No tiene autorización para modificar este registro.');
                     }
-                }
-
-                loadAuthorizationOptions();
-                
-                // Inicializar permisos en el tipo de autorización por defecto
-                if (authTypeSelector.options.length > 0) {
-                    updatePermissionsForType(authTypeSelector.value); 
-                }
-
-                authTypeSelector.addEventListener('change', (e) => {
-                    updatePermissionsForType(e.target.value);
-                    alert(`Cambiando a: ${optionsMap[e.target.value] || e.target.value}. Se han ajustado los permisos de los botones.`);
-                });
-
-                // --- Manejo de Pestañas ---
-                const tabButtons = document.querySelectorAll('.tab-btn');
-                const tabContents = document.querySelectorAll('.tab-content');
-
-                tabButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        tabButtons.forEach(btn => btn.classList.remove('active'));
-                        tabContents.forEach(content => content.classList.remove('active'));
-
-                        const tabId = button.getAttribute('data-tab');
-                        button.classList.add('active');
-                        document.getElementById(tabId).classList.add('active');
-                    });
-                });
-
-                // --- Simulación de Acciones ---
-                document.getElementById('adicionar-btn').addEventListener('click', () => {
-                    if (!document.getElementById('adicionar-btn').disabled) {
-                        alert(`Procedimiento Adicionar: Iniciando adición para ${optionsMap[authTypeSelector.value]}.`);
-                    }
-                });
-
-                document.getElementById('modificar-btn').addEventListener('click', () => {
-                    if (!document.getElementById('modificar-btn').disabled) {
-                        alert('Procedimiento Modificar: Habilitando la edición del registro en pantalla.');
-                    }
-                });
-
-                document.getElementById('anular-btn').addEventListener('click', () => {
-                    if (!document.getElementById('anular-btn').disabled) {
-                        if (confirm('Advertencia: ¿Está seguro que desea anular la autorización? Una autorización con auditoria concurrente, o con auditoria retrospectiva o reclamada no es posible ser anulada.')) {
-                            alert('Procedimiento Anular: Desplegando pantalla auxiliar para credenciales y motivo.');
+                } else if (action === 'anular') {
+                    if (can(authType, 'D')) {
+                        if (confirm(`¿Confirma que desea ANULAR la autorización ${id} (${optionsMap[authType]})?`)) {
+                            alert(`Autorización ${id} anulada (simulado).`);
+                            showDashboard(authType);
                         }
+                    } else {
+                        alert('Permiso denegado: No tiene autorización para anular este registro.');
                     }
+                } else if (action === 'imprimir') {
+                    alert(`Imprimiendo la autorización ${id}.`);
+                }
+            };
+            
+            // --- Eventos de Botones de la App (se mantienen) ---
+            if (formCancelarBtn) {
+                formCancelarBtn.addEventListener('click', () => {
+                    const currentType = getCurrentAuthType();
+                    if(currentType) showDashboard(currentType);
                 });
-                
-                document.getElementById('casos-btn').addEventListener('click', () => {
-                     if (!document.getElementById('casos-btn').disabled) {
-                        alert('Abriendo pestaña o ventana auxiliar para crear/seleccionar Caso.');
-                     }
-                });
+            }
 
-                document.getElementById('excepcion-btn').addEventListener('click', () => {
-                    if (!document.getElementById('excepcion-btn').disabled) {
-                        alert('Función para crear una Excepción y anular una restricción generada por el sistema.');
-                    }
+            if (formModificarBtn) {
+                formModificarBtn.addEventListener('click', () => {
+                    // Al presionar Modificar, cambia el modo a 'modificar' para habilitar campos y mostrar Guardar
+                    const id = document.getElementById('auth-number-display').textContent.replace(/\[.*\]/g, '').trim();
+                    handleAction('modificar', id);
                 });
+            }
 
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    localStorage.clear();
-                    // Simulamos la redirección mostrando la vista de login
-                    loginView.style.display = 'flex';
-                    mainAppView.style.display = 'none';
+            if (addNewBtn) {
+                addNewBtn.addEventListener('click', () => {
+                    setFormMode('adicionar');
                 });
+            }
+            
+            if (formGuardarBtn) {
+                formGuardarBtn.addEventListener('click', () => {
+                    alert('Autorización Guardada/Actualizada (simulado).');
+                    const currentType = getCurrentAuthType();
+                    if(currentType) showDashboard(currentType);
+                });
+            }
+
+            if (document.getElementById('form-casos-btn')) {
+                document.getElementById('form-casos-btn').addEventListener('click', () => {
+                    alert('Abriendo ventana para crear/asignar Caso.');
+                });
+            }
+
+            if (document.getElementById('form-excepcion-btn')) {
+                document.getElementById('form-excepcion-btn').addEventListener('click', () => {
+                    alert('Abriendo ventana para crear Excepción.');
+                });
+            }
+            
+            // --- Carga Inicial ---
+            const loggedInUserCheck = localStorage.getItem('loggedInUser');
+
+            if (loggedInUserCheck) {
+                // Si ya hay un usuario logueado en localStorage, inicializar la app.
+                initializeApp();
             }
         });
     </script>
