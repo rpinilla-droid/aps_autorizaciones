@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARS Servicios de Salud - Autorizaciones</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Módulo de Servicios de Salud</h1>
+    </header>
+
+    <main class="container">
+        <nav class="toolbar">
+            <button id="adicionar-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Adicionar (F2)</button>
+            <button id="modificar-btn" class="btn btn-secondary"><i class="fas fa-edit"></i> Modificar (F3)</button>
+            <button id="anular-btn" class="btn btn-danger"><i class="fas fa-times"></i> Anular (F4)</button>
+            <button class="btn btn-default"><i class="fas fa-save"></i> Guardar (F5)</button>
+            <button class="btn btn-default"><i class="fas fa-print"></i> Imprimir (F7)</button>
+            <button id="casos-btn" class="btn btn-info"><i class="fas fa-folder-open"></i> Casos</button>
+            <button id="excepcion-btn" class="btn btn-info"><i class="fas fa-certificate"></i> Excepción</button>
+        </nav>
+        
+        <section class="card authorization-form">
+            <h2>Datos de la Autorización</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="autorizacion-num">Autorización #</label>
+                    <input type="text" id="autorizacion-num" value="[Generado Auto]" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="prestador">Prestador</label>
+                    <input type="text" id="prestador" placeholder="Seleccione Prestador">
+                </div>
+                <div class="form-group">
+                    <label for="solicita">Solicitado por</label>
+                    <input type="text" id="solicita" placeholder="Nombre">
+                </div>
+                
+                <div class="form-group">
+                    <label for="afiliado">Afiliado</label>
+                    <input type="text" id="afiliado" placeholder="ID/Póliza">
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="Número de contacto">
+                </div>
+                <div class="form-group">
+                    <label for="tipo-servicio">Tipo Servicio</label>
+                    <select id="tipo-servicio">
+                        <option>Ambulatorio</option>
+                        <option>Internamiento</option>
+                        <option>Prevención</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="origen">Origen Servicio</label>
+                    <input type="text" id="origen" placeholder="Código">
+                </div>
+                <div class="form-group">
+                    <label for="tipo-atencion">Tipo Atención</label>
+                    <select id="tipo-atencion">
+                        <option>Programada</option>
+                        <option>Emergencia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipo-riesgo">Tipo Riesgo</label>
+                    <input type="text" id="tipo-riesgo" placeholder="Seguro de Cobertura">
+                </div>
+                
+                <div class="form-group">
+                    <label for="apertura">Fecha Apertura</label>
+                    <input type="date" id="apertura" value="2025-12-01">
+                </div>
+                <div class="form-group">
+                    <label for="cierre">Fecha Cierre</label>
+                    <input type="date" id="cierre" placeholder="Auto-cierre para ambulatorio">
+                </div>
+                <div class="form-group">
+                    <label for="dx-presuntivo">Dx. Presuntivo (CIE-10)</label>
+                    <input type="text" id="dx-presuntivo" placeholder="Buscar Diagnóstico">
+                </div>
+            </div>
+        </section>
+
+        <section class="detail-tabs">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="servicios">Servicios</button>
+                <button class="tab-btn" data-tab="diagnosticos">Diagnósticos</button>
+                <button class="tab-btn" data-tab="restricciones">Restricciones/Alertas</button>
+                <button class="tab-btn" data-tab="afiliado">Datos Afiliado</button>
+                </div>
+            
+            <div id="servicios" class="tab-content active">
+                <div class="services-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Renglón</th>
+                                <th>Descripción del Servicio</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                                <th>% Cobertura</th>
+                                <th>Copago</th>
+                                <th>Fecha Servicio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" value="G-100"></td>
+                                <td><input type="text" value="Consulta de Medicina General"></td>
+                                <td><input type="number" value="1"></td>
+                                <td><input type="number" value="1500.00"></td>
+                                <td>1500.00</td>
+                                <td><input type="number" value="80"></td>
+                                <td>300.00</td>
+                                <td><input type="date" value="2025-12-01"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="add-row-container"><button class="btn btn-small"><i class="fas fa-plus"></i> Añadir Servicio</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="totals">
+                    <span>Total Cobertura: **7,200.00**</span>
+                    <span>Total Copago: **800.00**</span>
+                </div>
+            </div>
+            
+            <div id="diagnosticos" class="tab-content">
+                <h3>Diagnósticos Secundarios y Condiciones</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dx-sec1">Dx. Secundario I (CIE-10)</label>
+                        <input type="text" id="dx-sec1">
+                    </div>
+                    <div class="form-group">
+                        <label for="dx-sec2">Dx. Secundario II (CIE-10)</label>
+                        <input type="text" id="dx-sec2">
+                    </div>
+                    <div class="form-group">
+                        <label for="complicacion">Complicación (CIE-10)</label>
+                        <input type="text" id="complicacion">
+                    </div>
+                </div>
+            </div>
+
+            <div id="restricciones" class="tab-content">
+                <h3>📢 Controles y Alertas Aplicadas</h3>
+                <div class="alerts-container">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        **Alerta por Afiliado:** Límite de 3 consultas de especialidad alcanzado para el mes[cite: 263].
+                    </div>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-ban"></i>
+                        **Restricción por Servicio:** El servicio "Ecografía 3D" no está cubierto por el plan básico[cite: 251, 268].
+                        <button class="btn btn-small">Crear Excepción</button>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-bell"></i>
+                        **Notificación por Prestador:** Se notificará al prestador sobre los topes de cobertura aplicables[cite: 264].
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="status-bar">
+            <span>Estatus: Consultando</span>
+            <span>Usuario: JPEREZ</span>
+            <button class="status-icon"><i class="fas fa-exchange-alt"></i> Modificaciones: 2</button>
+            <button class="status-icon"><i class="fas fa-comment-dots"></i> Notas: 1</button>
+            <button class="status-icon"><i class="fas fa-file-alt"></i> Digitalizaciones: 3</button>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
