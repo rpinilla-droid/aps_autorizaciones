@@ -25,6 +25,51 @@ body {
     line-height: 1.6;
 }
 
+/* --- Login Styles --- */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-light); 
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px; 
+    padding: 20px;
+}
+
+.login-card {
+    text-align: center;
+    padding: 30px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.login-title {
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.login-card p {
+    color: var(--secondary-color);
+    margin-bottom: 25px;
+}
+
+.btn-full-width {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.login-footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+/* --- Main App Styles --- */
+
 /* Contenedor Principal */
 .container {
     max-width: 1200px;
@@ -37,8 +82,39 @@ header {
     background-color: var(--primary-color);
     color: white;
     padding: 15px 0;
-    text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.type-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.type-selector {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ffffff60;
+    background-color: #ffffff20;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+.type-selector option {
+    background-color: var(--primary-color);
+    color: white;
+}
+.btn-small {
+    padding: 5px 10px;
+    font-size: 0.85em;
 }
 
 /* Botones y Barra de Herramientas */
@@ -55,12 +131,16 @@ header {
 .btn-primary { background-color: var(--primary-color); color: white; }
 .btn-secondary { background-color: var(--secondary-color); color: white; }
 .btn-danger { background-color: var(--danger-color); color: white; }
-.btn-info { background-color: var(--info-color); color: white; }
+.btn-info { background-color: #17a2b8; color: white; }
 .btn-default { background-color: var(--bg-light); color: #343a40; border: 1px solid var(--border-color); }
 .btn:hover { opacity: 0.9; }
 
 .toolbar {
     margin-bottom: 20px;
+    padding: 10px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -97,6 +177,13 @@ header {
 }
 
 /* Pestañas */
+.detail-tabs {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .tab-header {
     display: flex;
     border-bottom: 2px solid var(--border-color);
@@ -132,32 +219,35 @@ header {
 
 /* Tabla de Servicios */
 .services-table-container {
-    overflow-x: auto; /* Para tablas responsive */
+    overflow-x: auto; 
 }
 
 .services-table-container table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Ancho mínimo para la tabla */
+    min-width: 800px; 
 }
 
 .services-table-container th, .services-table-container td {
     border: 1px solid var(--border-color);
     padding: 8px;
     text-align: left;
+    white-space: nowrap;
 }
 
 .services-table-container thead {
     background-color: var(--bg-light);
 }
 
-.services-table-container td input[type="text"], 
-.services-table-container td input[type="number"],
-.services-table-container td input[type="date"] {
+.services-table-container td input {
     border: none;
     width: 100%;
     padding: 0;
     background: transparent;
+}
+
+.add-row-container {
+    text-align: center;
 }
 
 /* Totales en la cuadrícula */
@@ -202,16 +292,16 @@ header {
     color: white;
     padding: 10px 15px;
     border-radius: 4px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     font-size: 0.85em;
-    gap: 10px;
-}
-
-.status-bar span {
-    margin-right: 15px;
+    gap: 20px;
 }
 
 .status-icon {
@@ -227,4 +317,23 @@ header {
 }
 .status-icon i {
     margin-right: 5px;
+}
+
+/* Ajustes Responsive */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-content h1 {
+        margin-bottom: 10px;
+        font-size: 1.5em;
+    }
+    .toolbar {
+        justify-content: center;
+    }
+    .status-bar {
+        justify-content: space-between;
+        gap: 10px;
+    }
 }
