@@ -10,7 +10,16 @@
 </head>
 <body>
     <header>
-        <h1>Módulo de Servicios de Salud</h1>
+        <div class="header-content container">
+            <h1>Módulo de Servicios de Salud</h1>
+            
+            <div class="type-selector-container">
+                <label for="auth-type-selector">Tipo de Autorización:</label>
+                <select id="auth-type-selector" class="type-selector">
+                    </select>
+                <button id="logout-btn" class="btn btn-default btn-small"><i class="fas fa-sign-out-alt"></i> Salir</button>
+            </div>
+        </div>
     </header>
 
     <main class="container">
@@ -79,7 +88,7 @@
                 </div>
                 <div class="form-group">
                     <label for="cierre">Fecha Cierre</label>
-                    <input type="date" id="cierre" placeholder="Auto-cierre para ambulatorio">
+                    <input type="date" placeholder="Auto-cierre para ambulatorio">
                 </div>
                 <div class="form-group">
                     <label for="dx-presuntivo">Dx. Presuntivo (CIE-10)</label>
@@ -97,6 +106,7 @@
                 </div>
             
             <div id="servicios" class="tab-content active">
+                <h3>Detalle de Servicios</h3>
                 <div class="services-table-container">
                     <table>
                         <thead>
@@ -123,7 +133,17 @@
                                 <td><input type="date" value="2025-12-01"></td>
                             </tr>
                             <tr>
-                                <td colspan="9" class="add-row-container"><button class="btn btn-small"><i class="fas fa-plus"></i> Añadir Servicio</button></td>
+                                <td><input type="text" value="S-205"></td>
+                                <td><input type="text" value="Laboratorio Básico"></td>
+                                <td><input type="number" value="1"></td>
+                                <td><input type="number" value="500.00"></td>
+                                <td>500.00</td>
+                                <td><input type="number" value="100"></td>
+                                <td>0.00</td>
+                                <td><input type="date" value="2025-12-01"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="add-row-container"><button class="btn btn-small btn-primary"><i class="fas fa-plus"></i> Añadir Servicio</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -139,15 +159,15 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="dx-sec1">Dx. Secundario I (CIE-10)</label>
-                        <input type="text" id="dx-sec1">
+                        <input type="text" id="dx-sec1" placeholder="Diagnóstico secundario">
                     </div>
                     <div class="form-group">
                         <label for="dx-sec2">Dx. Secundario II (CIE-10)</label>
-                        <input type="text" id="dx-sec2">
+                        <input type="text" id="dx-sec2" placeholder="Diagnóstico secundario">
                     </div>
                     <div class="form-group">
                         <label for="complicacion">Complicación (CIE-10)</label>
-                        <input type="text" id="complicacion">
+                        <input type="text" id="complicacion" placeholder="Diagnóstico de complicación">
                     </div>
                 </div>
             </div>
@@ -157,27 +177,36 @@
                 <div class="alerts-container">
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        **Alerta por Afiliado:** Límite de 3 consultas de especialidad alcanzado para el mes[cite: 263].
+                        [cite_start]**Alerta por Afiliado:** Límite de 3 consultas de especialidad alcanzado para el mes. [cite: 263]
                     </div>
                     <div class="alert alert-danger">
                         <i class="fas fa-ban"></i>
-                        **Restricción por Servicio:** El servicio "Ecografía 3D" no está cubierto por el plan básico[cite: 251, 268].
-                        <button class="btn btn-small">Crear Excepción</button>
+                        [cite_start]**Restricción por Servicio:** El servicio "Ecografía 3D" no está cubierto por el plan básico. [cite: 268]
+                        <button class="btn btn-small btn-secondary">Crear Excepción</button>
                     </div>
                     <div class="alert alert-info">
                         <i class="fas fa-bell"></i>
-                        **Notificación por Prestador:** Se notificará al prestador sobre los topes de cobertura aplicables[cite: 264].
+                        [cite_start]**Notificación por Prestador:** Se notificará al prestador sobre los topes de cobertura aplicables. [cite: 264]
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-notes-medical"></i>
+                        [cite_start]**Auditoría Concurrente:** Esta autorización requiere seguimiento de auditoría. [cite: 270]
                     </div>
                 </div>
+            </div>
+            
+            <div id="afiliado" class="tab-content">
+                <h3>Datos Generales del Afiliado y Planes</h3>
+                [cite_start]<p>Aquí se informa de los datos generales del afiliado en cuestión, así como la descripción y los periodos de vigencia de los planes contratados por el afiliado. [cite: 406]</p>
             </div>
         </section>
         
         <footer class="status-bar">
-            <span>Estatus: Consultando</span>
-            <span>Usuario: JPEREZ</span>
-            <button class="status-icon"><i class="fas fa-exchange-alt"></i> Modificaciones: 2</button>
-            <button class="status-icon"><i class="fas fa-comment-dots"></i> Notas: 1</button>
-            <button class="status-icon"><i class="fas fa-file-alt"></i> Digitalizaciones: 3</button>
+            <span>Estatus: <span id="status-text">Consultando</span></span>
+            <span>Usuario: <span id="status-user"></span></span>
+            <button class="status-icon" title="Ver Modificaciones"><i class="fas fa-exchange-alt"></i> Modificaciones: 2</button>
+            <button class="status-icon" title="Ver Notas"><i class="fas fa-comment-dots"></i> Notas: 1</button>
+            <button class="status-icon" title="Ver Digitalizaciones"><i class="fas fa-file-alt"></i> Digitalizaciones: 3</button>
         </footer>
     </main>
 
