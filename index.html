@@ -4,212 +4,534 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARS Servicios de Salud - Autorizaciones</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Carga de Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Font Awesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Configuración base de la fuente */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilos estructurales para el login y el cuerpo principal */
+        .login-body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa; /* bg-gray-100 */
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--secondary-color);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Estilos para la tabla de servicios y el contenedor responsive */
+        .services-table-container {
+            overflow-x: auto;
+        }
+        
+        .services-table-container table {
+            min-width: 800px;
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        /* Ajuste de padding inferior para no ocultar contenido bajo el status bar */
+        main {
+            padding-bottom: 60px; /* Suficiente espacio para el status bar */
+        }
+        
+        /* Ocultar las vistas iniciales */
+        #main-app-view {
+            display: none;
+        }
+
+    </style>
 </head>
-<body>
-    <header>
-        <div class="header-content container">
-            <h1>Módulo de Servicios de Salud</h1>
-            
-            <div class="type-selector-container">
-                <label for="auth-type-selector">Tipo de Autorización:</label>
-                <select id="auth-type-selector" class="type-selector">
-                    </select>
-                <button id="logout-btn" class="btn btn-default btn-small"><i class="fas fa-sign-out-alt"></i> Salir</button>
+<body class="bg-gray-100">
+
+    <!-- ---------------------------------------------------- -->
+    <!-- -------------- VISTA DE INICIO DE SESIÓN ----------- -->
+    <!-- ---------------------------------------------------- -->
+    <div id="login-view" class="login-body">
+        <div class="w-full max-w-md p-6">
+            <div class="bg-white p-8 rounded-xl shadow-xl text-center">
+                <h1 class="text-3xl font-bold text-blue-600 mb-1">ARS Salud</h1>
+                <p class="text-gray-500 mb-6">Módulo de Servicios y Autorizaciones</p>
+                
+                <form id="login-form">
+                    <div class="mb-4 text-left">
+                        <label for="username" class="block text-sm font-semibold text-gray-700 mb-1">Usuario (Rol)</label>
+                        <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: auditor, caja, reembolso" required>
+                    </div>
+                    <div class="mb-6 text-left">
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
+                    </button>
+                </form>
+
+                <div id="login-message" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm" role="alert"></div>
+
+                <div class="mt-4 text-sm">
+                    <a href="#" class="text-blue-600 hover:text-blue-700">¿Olvidó su contraseña?</a>
+                </div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="container">
-        <nav class="toolbar">
-            <button id="adicionar-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Adicionar (F2)</button>
-            <button id="modificar-btn" class="btn btn-secondary"><i class="fas fa-edit"></i> Modificar (F3)</button>
-            <button id="anular-btn" class="btn btn-danger"><i class="fas fa-times"></i> Anular (F4)</button>
-            <button class="btn btn-default"><i class="fas fa-save"></i> Guardar (F5)</button>
-            <button class="btn btn-default"><i class="fas fa-print"></i> Imprimir (F7)</button>
-            <button id="casos-btn" class="btn btn-info"><i class="fas fa-folder-open"></i> Casos</button>
-            <button id="excepcion-btn" class="btn btn-info"><i class="fas fa-certificate"></i> Excepción</button>
-        </nav>
-        
-        <section class="card authorization-form">
-            <h2>Datos de la Autorización</h2>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="autorizacion-num">Autorización #</label>
-                    <input type="text" id="autorizacion-num" value="[Generado Auto]" disabled>
+    <!-- ---------------------------------------------------- -->
+    <!-- ---------------- VISTA DE APLICACIÓN PRINCIPAL ----- -->
+    <!-- ---------------------------------------------------- -->
+    <div id="main-app-view">
+        <header class="bg-blue-600 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-xl md:text-2xl font-bold mb-2 md:mb-0">Módulo de Servicios de Salud</h1>
+                
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="auth-type-selector" class="text-sm font-semibold">Tipo de Autorización:</label>
+                        <select id="auth-type-selector" class="bg-white bg-opacity-20 text-white px-3 py-1.5 rounded-lg border border-white border-opacity-30 font-semibold cursor-pointer">
+                            <!-- Opciones cargadas por JS -->
+                        </select>
+                    </div>
+                    <button id="logout-btn" class="bg-white text-blue-600 hover:bg-gray-100 font-bold px-3 py-1.5 rounded-lg text-sm shadow-md transition duration-150">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Salir
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="prestador">Prestador</label>
-                    <input type="text" id="prestador" placeholder="Seleccione Prestador">
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-5">
+            <!-- Barra de Herramientas Principal (Acciones) -->
+            <nav class="bg-white p-4 rounded-lg shadow-lg mb-6 flex flex-wrap gap-3">
+                <!-- Eliminadas referencias a las teclas F# -->
+                <button id="adicionar-btn" class="flex items-center bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-plus mr-2"></i> Adicionar</button>
+                <button id="modificar-btn" class="flex items-center bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition"><i class="fas fa-edit mr-2"></i> Modificar</button>
+                <button id="anular-btn" class="flex items-center bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition"><i class="fas fa-times mr-2"></i> Anular</button>
+                <button class="flex items-center bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition"><i class="fas fa-save mr-2"></i> Guardar</button>
+                <button class="flex items-center bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition"><i class="fas fa-print mr-2"></i> Imprimir</button>
+                <button id="casos-btn" class="flex items-center bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition"><i class="fas fa-folder-open mr-2"></i> Casos</button>
+                <button id="excepcion-btn" class="flex items-center bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-700 transition"><i class="fas fa-certificate mr-2"></i> Excepción</button>
+            </nav>
+            
+            <!-- Formulario de Autorización -->
+            <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Datos de la Autorización</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    <!-- Campos principales -->
+                    <div class="space-y-4">
+                        <label for="autorizacion-num" class="block text-sm font-semibold">Autorización #</label>
+                        <input type="text" id="autorizacion-num" value="[Generado Auto]" disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="prestador" class="block text-sm font-semibold">Prestador</label>
+                        <input type="text" id="prestador" placeholder="Seleccione Prestador" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="solicita" class="block text-sm font-semibold">Solicitado por</label>
+                        <input type="text" id="solicita" placeholder="Nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    
+                    <!-- Campos Afiliado / Teléfono / Tipo Servicio -->
+                    <div class="space-y-4">
+                        <label for="afiliado" class="block text-sm font-semibold">Afiliado</label>
+                        <input type="text" id="afiliado" placeholder="ID/Póliza" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="telefono" class="block text-sm font-semibold">Teléfono</label>
+                        <input type="tel" id="telefono" placeholder="Número de contacto" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="tipo-servicio" class="block text-sm font-semibold">Tipo Servicio</label>
+                        <select id="tipo-servicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            <option>Ambulatorio</option>
+                            <option>Internamiento</option>
+                            <option>Prevención</option>
+                        </select>
+                    </div>
+
+                    <!-- Campos Origen / Tipo Atención / Tipo Riesgo -->
+                    <div class="space-y-4">
+                        <label for="origen" class="block text-sm font-semibold">Origen Servicio</label>
+                        <input type="text" id="origen" placeholder="Código" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="tipo-atencion" class="block text-sm font-semibold">Tipo Atención</label>
+                        <select id="tipo-atencion" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                            <option>Programada</option>
+                            <option>Emergencia</option>
+                        </select>
+                    </div>
+                    <div class="space-y-4">
+                        <label for="tipo-riesgo" class="block text-sm font-semibold">Tipo Riesgo</label>
+                        <input type="text" id="tipo-riesgo" placeholder="Seguro de Cobertura" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    
+                    <!-- Campos de Fecha y Dx. -->
+                    <div class="space-y-4">
+                        <label for="apertura" class="block text-sm font-semibold">Fecha Apertura</label>
+                        <input type="date" id="apertura" value="2025-12-01" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="cierre" class="block text-sm font-semibold">Fecha Cierre</label>
+                        <input type="date" id="cierre" placeholder="Auto-cierre para ambulatorio" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="space-y-4">
+                        <label for="dx-presuntivo" class="block text-sm font-semibold">Dx. Presuntivo (CIE-10)</label>
+                        <input type="text" id="dx-presuntivo" placeholder="Buscar Diagnóstico" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="solicita">Solicitado por</label>
-                    <input type="text" id="solicita" placeholder="Nombre">
+            </section>
+
+            <!-- Pestañas de Detalle y Alertas -->
+            <section class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                <div class="flex border-b-2 border-gray-200 mb-4 flex-wrap gap-2" id="tab-header">
+                    <button class="tab-btn active" data-tab="servicios">Servicios</button>
+                    <button class="tab-btn" data-tab="diagnosticos">Diagnósticos</button>
+                    <button class="tab-btn" data-tab="restricciones">Restricciones/Alertas</button>
+                    <button class="tab-btn" data-tab="afiliado">Datos Afiliado</button>
                 </div>
                 
-                <div class="form-group">
-                    <label for="afiliado">Afiliado</label>
-                    <input type="text" id="afiliado" placeholder="ID/Póliza">
-                </div>
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" placeholder="Número de contacto">
-                </div>
-                <div class="form-group">
-                    <label for="tipo-servicio">Tipo Servicio</label>
-                    <select id="tipo-servicio">
-                        <option>Ambulatorio</option>
-                        <option>Internamiento</option>
-                        <option>Prevención</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="origen">Origen Servicio</label>
-                    <input type="text" id="origen" placeholder="Código">
-                </div>
-                <div class="form-group">
-                    <label for="tipo-atencion">Tipo Atención</label>
-                    <select id="tipo-atencion">
-                        <option>Programada</option>
-                        <option>Emergencia</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="tipo-riesgo">Tipo Riesgo</label>
-                    <input type="text" id="tipo-riesgo" placeholder="Seguro de Cobertura">
+                <div id="servicios" class="tab-content active">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Detalle de Servicios</h3>
+                    <div class="services-table-container border rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 border-b text-left">Renglón</th>
+                                    <th class="p-3 border-b text-left">Descripción del Servicio</th>
+                                    <th class="p-3 border-b text-left">Cant.</th>
+                                    <th class="p-3 border-b text-left">Precio</th>
+                                    <th class="p-3 border-b text-left">Total</th>
+                                    <th class="p-3 border-b text-left">% Cobertura</th>
+                                    <th class="p-3 border-b text-left">Copago</th>
+                                    <th class="p-3 border-b text-left">Fecha Servicio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 border-b"><input type="text" value="G-100" class="w-full"></td>
+                                    <td class="p-3 border-b"><input type="text" value="Consulta de Medicina General" class="w-full"></td>
+                                    <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
+                                    <td class="p-3 border-b text-right">1500.00</td>
+                                    <td class="p-3 border-b text-right font-medium">1500.00</td>
+                                    <td class="p-3 border-b"><input type="number" value="80" class="w-full text-right"></td>
+                                    <td class="p-3 border-b text-right font-medium text-red-600">300.00</td>
+                                    <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 border-b"><input type="text" value="S-205" class="w-full"></td>
+                                    <td class="p-3 border-b"><input type="text" value="Laboratorio Básico" class="w-full"></td>
+                                    <td class="p-3 border-b"><input type="number" value="1" class="w-full text-right"></td>
+                                    <td class="p-3 border-b text-right">500.00</td>
+                                    <td class="p-3 border-b text-right font-medium">500.00</td>
+                                    <td class="p-3 border-b"><input type="number" value="100" class="w-full text-right"></td>
+                                    <td class="p-3 border-b text-right font-medium text-red-600">0.00</td>
+                                    <td class="p-3 border-b"><input type="date" value="2025-12-01" class="w-full"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-end mt-3">
+                        <button class="bg-blue-100 text-blue-600 font-semibold py-1.5 px-3 rounded-lg hover:bg-blue-200 text-xs"><i class="fas fa-plus mr-1"></i> Añadir Servicio</button>
+                    </div>
+                    <div class="totals flex justify-end gap-6 mt-4 pt-4 border-t border-gray-200 text-lg font-bold">
+                        <span class="text-gray-600">Total Cobertura: <span class="text-green-600">7,200.00</span></span>
+                        <span class="text-gray-600">Total Copago: <span class="text-red-600">800.00</span></span>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="apertura">Fecha Apertura</label>
-                    <input type="date" id="apertura" value="2025-12-01">
+                <div id="diagnosticos" class="tab-content">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Diagnósticos Secundarios y Condiciones</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="space-y-4">
+                            <label for="dx-sec1" class="block text-sm font-semibold">Dx. Secundario I (CIE-10)</label>
+                            <input type="text" id="dx-sec1" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="space-y-4">
+                            <label for="dx-sec2" class="block text-sm font-semibold">Dx. Secundario II (CIE-10)</label>
+                            <input type="text" id="dx-sec2" placeholder="Diagnóstico secundario" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div class="space-y-4">
+                            <label for="complicacion" class="block text-sm font-semibold">Complicación (CIE-10)</label>
+                            <input type="text" id="complicacion" placeholder="Diagnóstico de complicación" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="cierre">Fecha Cierre</label>
-                    <input type="date" placeholder="Auto-cierre para ambulatorio">
-                </div>
-                <div class="form-group">
-                    <label for="dx-presuntivo">Dx. Presuntivo (CIE-10)</label>
-                    <input type="text" id="dx-presuntivo" placeholder="Buscar Diagnóstico">
-                </div>
-            </div>
-        </section>
 
-        <section class="detail-tabs">
-            <div class="tab-header">
-                <button class="tab-btn active" data-tab="servicios">Servicios</button>
-                <button class="tab-btn" data-tab="diagnosticos">Diagnósticos</button>
-                <button class="tab-btn" data-tab="restricciones">Restricciones/Alertas</button>
-                <button class="tab-btn" data-tab="afiliado">Datos Afiliado</button>
-                </div>
-            
-            <div id="servicios" class="tab-content active">
-                <h3>Detalle de Servicios</h3>
-                <div class="services-table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Renglón</th>
-                                <th>Descripción del Servicio</th>
-                                <th>Cant.</th>
-                                <th>Precio</th>
-                                <th>Total</th>
-                                <th>% Cobertura</th>
-                                <th>Copago</th>
-                                <th>Fecha Servicio</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><input type="text" value="G-100"></td>
-                                <td><input type="text" value="Consulta de Medicina General"></td>
-                                <td><input type="number" value="1"></td>
-                                <td><input type="number" value="1500.00"></td>
-                                <td>1500.00</td>
-                                <td><input type="number" value="80"></td>
-                                <td>300.00</td>
-                                <td><input type="date" value="2025-12-01"></td>
-                            </tr>
-                            <tr>
-                                <td><input type="text" value="S-205"></td>
-                                <td><input type="text" value="Laboratorio Básico"></td>
-                                <td><input type="number" value="1"></td>
-                                <td><input type="number" value="500.00"></td>
-                                <td>500.00</td>
-                                <td><input type="number" value="100"></td>
-                                <td>0.00</td>
-                                <td><input type="date" value="2025-12-01"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="9" class="add-row-container"><button class="btn btn-small btn-primary"><i class="fas fa-plus"></i> Añadir Servicio</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="totals">
-                    <span>Total Cobertura: **7,200.00**</span>
-                    <span>Total Copago: **800.00**</span>
-                </div>
-            </div>
-            
-            <div id="diagnosticos" class="tab-content">
-                <h3>Diagnósticos Secundarios y Condiciones</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="dx-sec1">Dx. Secundario I (CIE-10)</label>
-                        <input type="text" id="dx-sec1" placeholder="Diagnóstico secundario">
-                    </div>
-                    <div class="form-group">
-                        <label for="dx-sec2">Dx. Secundario II (CIE-10)</label>
-                        <input type="text" id="dx-sec2" placeholder="Diagnóstico secundario">
-                    </div>
-                    <div class="form-group">
-                        <label for="complicacion">Complicación (CIE-10)</label>
-                        <input type="text" id="complicacion" placeholder="Diagnóstico de complicación">
+                <div id="restricciones" class="tab-content">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">📢 Controles y Alertas Aplicadas</h3>
+                    <div class="flex flex-col gap-4">
+                        
+                        <!-- Alerta por Afiliado/Servicio/Grupos -->
+                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-yellow-100 text-yellow-800 border border-yellow-300">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <div>
+                                <span class="font-bold">Alerta por Afiliado:</span> Límite de 3 consultas de especialidad alcanzado para el mes.
+                            </div>
+                        </div>
+                        
+                        <!-- Restricción con Opción de Excepción -->
+                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-red-100 text-red-800 border border-red-300 justify-between flex-wrap gap-2">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-ban mt-1"></i>
+                                <div>
+                                    <span class="font-bold">Restricción por Servicio:</span> El servicio "Ecografía 3D" no está cubierto por el plan básico del afiliado.
+                                </div>
+                            </div>
+                            <button class="bg-gray-500 text-white font-semibold py-1.5 px-3 rounded-lg hover:bg-gray-600 text-xs self-center">Crear Excepción</button>
+                        </div>
+                        
+                        <!-- Notificación de Auditoría -->
+                        <div class="p-4 rounded-lg flex items-start space-x-3 bg-blue-100 text-blue-800 border border-blue-300">
+                            <i class="fas fa-notes-medical mt-1"></i>
+                            <div>
+                                <span class="font-bold">Auditoría Concurrente:</span> Esta autorización ha activado el módulo de auditoría concurrente.
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <div id="afiliado" class="tab-content">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Datos Generales del Afiliado y Planes</h3>
+                    <p class="text-gray-600">Aquí se informa de los datos generales del afiliado en cuestión, así como la descripción y los periodos de vigencia de los planes contratados por el afiliado (Básico, Voluntario, Colectivo, etc.).</p>
+                </div>
 
-            <div id="restricciones" class="tab-content">
-                <h3>📢 Controles y Alertas Aplicadas</h3>
-                <div class="alerts-container">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        [cite_start]**Alerta por Afiliado:** Límite de 3 consultas de especialidad alcanzado para el mes. [cite: 263]
-                    </div>
-                    <div class="alert alert-danger">
-                        <i class="fas fa-ban"></i>
-                        [cite_start]**Restricción por Servicio:** El servicio "Ecografía 3D" no está cubierto por el plan básico. [cite: 268]
-                        <button class="btn btn-small btn-secondary">Crear Excepción</button>
-                    </div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-bell"></i>
-                        [cite_start]**Notificación por Prestador:** Se notificará al prestador sobre los topes de cobertura aplicables. [cite: 264]
-                    </div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-notes-medical"></i>
-                        [cite_start]**Auditoría Concurrente:** Esta autorización requiere seguimiento de auditoría. [cite: 270]
-                    </div>
-                </div>
-            </div>
-            
-            <div id="afiliado" class="tab-content">
-                <h3>Datos Generales del Afiliado y Planes</h3>
-                [cite_start]<p>Aquí se informa de los datos generales del afiliado en cuestión, así como la descripción y los periodos de vigencia de los planes contratados por el afiliado. [cite: 406]</p>
-            </div>
-        </section>
+            </section>
+        </main>
         
-        <footer class="status-bar">
-            <span>Estatus: <span id="status-text">Consultando</span></span>
-            <span>Usuario: <span id="status-user"></span></span>
-            <button class="status-icon" title="Ver Modificaciones"><i class="fas fa-exchange-alt"></i> Modificaciones: 2</button>
-            <button class="status-icon" title="Ver Notas"><i class="fas fa-comment-dots"></i> Notas: 1</button>
-            <button class="status-icon" title="Ver Digitalizaciones"><i class="fas fa-file-alt"></i> Digitalizaciones: 3</button>
+        <!-- Barra de Estatus (Fixed Footer) -->
+        <footer class="status-bar bg-gray-800 text-white p-3 shadow-2xl flex justify-start items-center flex-wrap gap-5 text-sm">
+            <span>Estatus: <span id="status-text" class="font-bold text-green-400">Consultando</span></span>
+            <span>Usuario: <span id="status-user" class="font-bold"></span></span>
+            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Modificaciones"><i class="fas fa-exchange-alt mr-1"></i> Modificaciones: 2</button>
+            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Notas"><i class="fas fa-comment-dots mr-1"></i> Notas: 1</button>
+            <button class="flex items-center text-gray-300 hover:text-yellow-400 transition" title="Ver Digitalizaciones"><i class="fas fa-file-alt mr-1"></i> Digitalizaciones: 3</button>
         </footer>
-    </main>
+    </div>
 
-    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Configuración de Roles ---
+            const roles = {
+                auditor: ['telefonia', 'precertificacion', 'reembolso', 'reclamo', 'ivr', 'webservice', 'importadas'],
+                caja: ['telefonia', 'precertificacion'],
+                reembolso: ['reembolso'],
+            };
+
+            // Mapeo de tipos de autorización para el selector
+            const optionsMap = {
+                'telefonia': 'Autorizaciones Telefónicas',
+                'precertificacion': 'Autorizaciones Pre-Certificadas',
+                'reembolso': 'Autorizaciones de Reembolsos',
+                'reclamo': 'Autorizaciones Reclamos No Autorizados',
+                'ivr': 'Autorizaciones IVR (Solo Modificar)',
+                'webservice': 'Autorizaciones Web Service (Solo Modificar)',
+                'importadas': 'Autorizaciones Importadas (Solo Modificar)'
+            };
+
+            // Elementos de la vista
+            const loginView = document.getElementById('login-view');
+            const mainAppView = document.getElementById('main-app-view');
+            const loginForm = document.getElementById('login-form');
+
+            // --- Control de Vistas ---
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                loginView.style.display = 'none';
+                mainAppView.style.display = 'block';
+                initializeApp();
+            } else {
+                loginView.style.display = 'flex';
+                mainAppView.style.display = 'none';
+            }
+
+            // --- Lógica de Login ---
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value.toLowerCase();
+                    const password = document.getElementById('password').value;
+                    const loginMessage = document.getElementById('login-message');
+                    
+                    if (password === '1234' && roles[username]) {
+                        localStorage.setItem('userPermissions', JSON.stringify(roles[username]));
+                        localStorage.setItem('loggedInUser', username.toUpperCase()); 
+                        
+                        // Transición a la vista principal
+                        loginView.style.display = 'none';
+                        mainAppView.style.display = 'block';
+                        initializeApp();
+                    } else {
+                        loginMessage.textContent = 'Credenciales o rol no válidos. Pruebe con "auditor", "caja", o "reembolso" y contraseña 1234.';
+                        loginMessage.classList.remove('hidden');
+                    }
+                });
+            }
+
+            // --- Lógica de la Aplicación Principal ---
+            function initializeApp() {
+                const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+                const loggedInUser = localStorage.getItem('loggedInUser');
+                const authTypeSelector = document.getElementById('auth-type-selector');
+                const statusUser = document.getElementById('status-user');
+                
+                statusUser.textContent = loggedInUser; 
+
+                // Función para cargar las opciones de Autorización según el rol
+                function loadAuthorizationOptions() {
+                    authTypeSelector.innerHTML = ''; 
+                    
+                    userPermissions.forEach(permission => {
+                        const option = document.createElement('option');
+                        option.value = permission;
+                        option.textContent = optionsMap[permission] || permission;
+                        authTypeSelector.appendChild(option);
+                    });
+                }
+                
+                // Control de acceso por tipo de autorización seleccionada
+                function updatePermissionsForType(selectedType) {
+                    const isReadWrite = ['telefonia', 'precertificacion', 'reembolso', 'reclamo'].includes(selectedType);
+                    const isReadOnly = ['ivr', 'webservice', 'importadas'].includes(selectedType);
+
+                    // Botones de acción
+                    document.getElementById('adicionar-btn').disabled = !isReadWrite;
+                    document.getElementById('modificar-btn').disabled = !isReadWrite && !isReadOnly; 
+                    document.getElementById('anular-btn').disabled = isReadOnly; 
+                    document.getElementById('casos-btn').disabled = !isReadWrite;
+                    document.getElementById('excepcion-btn').disabled = !isReadWrite;
+                    
+                    // Actualizar el estado en el footer
+                    const statusText = document.getElementById('status-text');
+                    if (isReadWrite) {
+                        statusText.textContent = 'Modo Escritura/Lectura';
+                        statusText.classList.remove('text-red-400');
+                        statusText.classList.add('text-green-400');
+                    } else if (isReadOnly) {
+                         statusText.textContent = 'Modo Solo Modificación';
+                         statusText.classList.remove('text-green-400');
+                         statusText.classList.add('text-red-400');
+                    } else {
+                         statusText.textContent = 'Modo Consulta';
+                         statusText.classList.remove('text-green-400', 'text-red-400');
+                    }
+                }
+
+                loadAuthorizationOptions();
+                
+                // Inicializar permisos en el tipo de autorización por defecto
+                if (authTypeSelector.options.length > 0) {
+                    updatePermissionsForType(authTypeSelector.value); 
+                }
+
+                authTypeSelector.addEventListener('change', (e) => {
+                    updatePermissionsForType(e.target.value);
+                    alert(`Cambiando a: ${optionsMap[e.target.value] || e.target.value}. Se han ajustado los permisos de los botones.`);
+                });
+
+                // --- Manejo de Pestañas ---
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        tabContents.forEach(content => content.classList.remove('active'));
+
+                        const tabId = button.getAttribute('data-tab');
+                        button.classList.add('active');
+                        document.getElementById(tabId).classList.add('active');
+                    });
+                });
+
+                // --- Simulación de Acciones ---
+                document.getElementById('adicionar-btn').addEventListener('click', () => {
+                    if (!document.getElementById('adicionar-btn').disabled) {
+                        alert(`Procedimiento Adicionar: Iniciando adición para ${optionsMap[authTypeSelector.value]}.`);
+                    }
+                });
+
+                document.getElementById('modificar-btn').addEventListener('click', () => {
+                    if (!document.getElementById('modificar-btn').disabled) {
+                        alert('Procedimiento Modificar: Habilitando la edición del registro en pantalla.');
+                    }
+                });
+
+                document.getElementById('anular-btn').addEventListener('click', () => {
+                    if (!document.getElementById('anular-btn').disabled) {
+                        if (confirm('Advertencia: ¿Está seguro que desea anular la autorización? Una autorización con auditoria concurrente, o con auditoria retrospectiva o reclamada no es posible ser anulada.')) {
+                            alert('Procedimiento Anular: Desplegando pantalla auxiliar para credenciales y motivo.');
+                        }
+                    }
+                });
+                
+                document.getElementById('casos-btn').addEventListener('click', () => {
+                     if (!document.getElementById('casos-btn').disabled) {
+                        alert('Abriendo pestaña o ventana auxiliar para crear/seleccionar Caso.');
+                     }
+                });
+
+                document.getElementById('excepcion-btn').addEventListener('click', () => {
+                    if (!document.getElementById('excepcion-btn').disabled) {
+                        alert('Función para crear una Excepción y anular una restricción generada por el sistema.');
+                    }
+                });
+
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    localStorage.clear();
+                    // Simulamos la redirección mostrando la vista de login
+                    loginView.style.display = 'flex';
+                    mainAppView.style.display = 'none';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
